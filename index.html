@@ -630,12 +630,35 @@ function updateSubmitButtons(){
   checkerBtn.textContent = isFormOpen('checker') ? 'Отправить заявку' : '❌ Набор закрыт — ждите отбора';
 }
 
+// Жёсткая проверка перед отправкой: всегда тянем самый свежий конфиг из облака,
+// чтобы закрытие набора администратором действовало АБСОЛЮТНО для всех и мгновенно,
+// а не только после следующего автообновления раз в 5 секунд.
+async function verifyOpenBeforeSubmit(type, submitBtn){
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Проверка статуса набора...';
+  await loadConfigFromCloud();
+  renderStatus();
+  updateSubmitButtons();
+  const open = isFormOpen(type);
+  if(!open){
+    submitBtn.disabled = true;
+  }else{
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+  return open;
+}
+
 // Отправка медиа-заявки (все на admin@example.com)
-document.getElementById('mediaApplyForm').addEventListener('submit', (e) => {
+document.getElementById('mediaApplyForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = document.getElementById('mediaFormMsg');
-  if(!isFormOpen('media')){
+  const submitBtn = document.getElementById('mediaSubmitBtn');
+  const stillOpen = await verifyOpenBeforeSubmit('media', submitBtn);
+  if(!stillOpen){
     msg.className = 'form-msg err'; msg.textContent = '❌ Набор на медиа сейчас закрыт. Ждите отбора.';
+    submitBtn.textContent = '❌ Набор закрыт — ждите отбора';
     return;
   }
   const id = genId();
@@ -657,11 +680,14 @@ document.getElementById('mediaApplyForm').addEventListener('submit', (e) => {
 });
 
 // Отправка заявки на зам. куратора (все на admin@example.com)
-document.getElementById('curatorApplyForm').addEventListener('submit', (e) => {
+document.getElementById('curatorApplyForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = document.getElementById('curatorFormMsg');
-  if(!isFormOpen('curator')){
+  const submitBtn = document.getElementById('curatorSubmitBtn');
+  const stillOpen = await verifyOpenBeforeSubmit('curator', submitBtn);
+  if(!stillOpen){
     msg.className = 'form-msg err'; msg.textContent = '❌ Набор на зам. куратора сейчас закрыт. Ждите отбора.';
+    submitBtn.textContent = '❌ Набор закрыт — ждите отбора';
     return;
   }
   const id = genId();
@@ -683,11 +709,14 @@ document.getElementById('curatorApplyForm').addEventListener('submit', (e) => {
 });
 
 // Отправка заявки на проверяющего (все на admin@example.com)
-document.getElementById('checkerApplyForm').addEventListener('submit', (e) => {
+document.getElementById('checkerApplyForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = document.getElementById('checkerFormMsg');
-  if(!isFormOpen('checker')){
+  const submitBtn = document.getElementById('checkerSubmitBtn');
+  const stillOpen = await verifyOpenBeforeSubmit('checker', submitBtn);
+  if(!stillOpen){
     msg.className = 'form-msg err'; msg.textContent = '❌ Набор на проверяющего сейчас закрыт. Ждите отбора.';
+    submitBtn.textContent = '❌ Набор закрыт — ждите отбора';
     return;
   }
   const id = genId();
@@ -1028,7 +1057,7 @@ async function init(){
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
     }
-  }, 5000);
+  }, 3000);
 }
 
 init();
