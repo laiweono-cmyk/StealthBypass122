@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StealthBypass — медиа-набор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0e11;
+    --bg-panel:#12161b;
+    --bg-panel-2:#171c22;
+    --border:#262c34;
+    --border-soft:#1d232b;
+    --gold:#c9a227;
+    --gold-bright:#e6c65c;
+    --cyan:#4fb2f5;
+    --text:#eae6db;
+    --muted:#8b929b;
+    --muted-2:#5f666e;
+    --success:#4c9a5a;
+    --success-bg:rgba(76,154,90,.12);
+    --danger:#c1443a;
+    --danger-bg:rgba(193,68,58,.12);
+    --radius:14px;
+    --curator:#8b5cf6;
+    --curator-bg:rgba(139,92,246,.12);
+    --checker:#f59e0b;
+    --checker-bg:rgba(245,158,11,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:radial-gradient(circle at 15% 0%, rgba(201,162,39,.07), transparent 45%),radial-gradient(circle at 85% 15%, rgba(79,178,245,.05), transparent 40%),var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    line-height:1.5;
+  }
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .display{font-family:'Bebas Neue',sans-serif;letter-spacing:.03em;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+  .hidden{display:none !important;}
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:rgba(11,14,17,.75);border-bottom:1px solid var(--border-soft);}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1080px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';color:var(--gold-bright);font-size:18px;}
+  .brand-name{font-family:'Bebas Neue';font-size:22px;letter-spacing:.04em;color:var(--text);}
+  .brand-sub{font-size:10px;color:var(--muted-2);letter-spacing:.15em;text-transform:uppercase;margin-top:-2px;}
+  .nav-links{display:flex;gap:22px;align-items:center;font-size:14px;color:var(--muted);}
+  .nav-links a:hover{color:var(--gold-bright);}
+  .nav-cta{background:var(--gold);color:#14120a;padding:9px 18px;border-radius:8px;font-weight:700;font-size:13.5px;transition:.2s;}
+  .nav-cta:hover{background:var(--gold-bright);transform:translateY(-1px);}
+  .hero{padding:76px 0 60px;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;}
+  @media (max-width:860px){.hero{grid-template-columns:1fr;padding-top:48px;}}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono';font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-bright);border:1px solid rgba(201,162,39,.35);background:rgba(201,162,39,.06);padding:6px 12px;border-radius:100px;margin-bottom:22px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--gold-bright);}
+  h1{font-family:'Bebas Neue';font-size:clamp(40px,6vw,64px);line-height:.98;letter-spacing:.01em;margin-bottom:20px;}
+  h1 .accent{color:var(--gold-bright);}
+  .hero-desc{color:var(--muted);font-size:16.5px;max-width:480px;margin-bottom:32px;}
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{padding:14px 24px;border-radius:9px;font-weight:700;font-size:14.5px;border:1px solid transparent;transition:.2s;display:inline-flex;align-items:center;gap:8px;}
+  .btn-primary{background:var(--gold);color:#14120a;}
+  .btn-primary:hover{background:var(--gold-bright);transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,162,39,.25);}
+  .btn-ghost{border-color:var(--border);color:var(--text);background:var(--bg-panel);}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold-bright);}
+  .idcard{background:linear-gradient(160deg,var(--bg-panel-2),var(--bg-panel));border:1px solid var(--border);border-radius:16px;padding:26px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.45);}
+  .idcard::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 26px,rgba(255,255,255,.015) 26px 27px);pointer-events:none;}
+  .idcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+  .idcard-label{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.16em;color:var(--muted-2);text-transform:uppercase;}
+  .idcard-id{font-family:'JetBrains Mono';font-size:11px;color:var(--gold-bright);}
+  .idcard-stamp{position:absolute;top:22px;right:-34px;width:150px;text-align:center;background:rgba(76,154,90,.14);color:var(--success);border:1.5px dashed var(--success);transform:rotate(38deg);font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.12em;padding:3px 0;font-weight:700;}
+  .idcard-avatar{width:54px;height:54px;border-radius:10px;background:linear-gradient(135deg,var(--gold),#8a6d17);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:26px;color:#14120a;margin-bottom:14px;}
+  .idcard-name{font-family:'Bebas Neue';font-size:26px;letter-spacing:.02em;margin-bottom:2px;}
+  .idcard-role{color:var(--muted);font-size:12.5px;margin-bottom:18px;}
+  .idcard-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:18px;}
+  .idcard-field .k{font-family:'JetBrains Mono';font-size:10px;color:var(--muted-2);letter-spacing:.1em;text-transform:uppercase;}
+  .idcard-field .v{font-size:14px;font-weight:600;margin-top:2px;}
+  .idcard-barcode{height:30px;background:repeating-linear-gradient(90deg,var(--muted-2) 0 2px,transparent 2px 5px);opacity:.35;border-radius:2px;}
+  section{padding:64px 0;}
+  .section-head{margin-bottom:34px;}
+  .section-eyebrow{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:10px;}
+  .section-title{font-family:'Bebas Neue';font-size:34px;letter-spacing:.01em;}
+  .section-desc{color:var(--muted);margin-top:8px;max-width:640px;}
+  hr.rule{border:none;border-top:1px solid var(--border-soft);margin:0;}
+  .about-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px;}
+  @media (max-width:760px){.about-grid{grid-template-columns:1fr;}}
+  .about-card{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+  .about-card .num{font-family:'JetBrains Mono';color:var(--gold-bright);font-size:12px;margin-bottom:10px;}
+  .about-card h3{font-size:16.5px;margin-bottom:8px;font-weight:700;}
+  .about-card p{color:var(--muted);font-size:14px;}
+  .status-panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:26px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .status-left{display:flex;align-items:center;gap:16px;}
+  .status-light{width:14px;height:14px;border-radius:50%;position:relative;flex-shrink:0;}
+  .status-light.open{background:var(--success);box-shadow:0 0 0 4px var(--success-bg);}
+  .status-light.closed{background:var(--danger);box-shadow:0 0 0 4px var(--danger-bg);}
+  .status-light.open::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--success);animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%{opacity:.8;transform:scale(1);}100%{opacity:0;transform:scale(1.9);}}
+  .status-title{font-family:'Bebas Neue';font-size:22px;letter-spacing:.02em;}
+  .status-sub{color:var(--muted);font-size:13.5px;margin-top:2px;}
+  .status-announce{color:var(--text);font-size:14px;max-width:360px;border-left:2px solid var(--border);padding-left:16px;}
+  .channel-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px;}
+  @media (max-width:640px){.channel-row{grid-template-columns:1fr;}}
+  .channel-card{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px;display:flex;align-items:center;gap:16px;transition:.2s;}
+  .channel-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+  .channel-ic{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:18px;flex-shrink:0;}
+  .ic-discord{background:rgba(88,101,242,.15);color:#8b95ff;}
+  .ic-tg{background:rgba(79,178,245,.15);color:var(--cyan);}
+  .channel-name{font-weight:700;font-size:15px;}
+  .channel-sub{color:var(--muted);font-size:12.5px;margin-top:2px;}
+  .channel-arrow{margin-left:auto;color:var(--muted-2);font-size:18px;}
+  .apply-tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid var(--border-soft);padding-bottom:12px;flex-wrap:wrap;}
+  .apply-tab{background:transparent;border:none;color:var(--muted);font-size:16px;font-weight:600;padding:8px 16px;border-radius:8px;transition:.2s;cursor:pointer;}
+  .apply-tab.active{color:var(--gold-bright);background:rgba(201,162,39,.08);}
+  .apply-tab:hover{color:var(--text);}
+  .apply-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;margin-top:10px;align-items:start;}
+  @media (max-width:900px){.apply-grid{grid-template-columns:1fr;}}
+  .form-panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:28px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:7px;font-weight:600;}
+  .field input,.field textarea,.field select{width:100%;background:var(--bg-panel-2);border:1px solid var(--border);color:var(--text);padding:12px 13px;border-radius:8px;font-size:14.5px;font-family:'Inter';transition:.15s;}
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--gold);}
+  .field textarea{min-height:80px;resize:vertical;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:520px){.field-row{grid-template-columns:1fr;}}
+  .submit-btn{width:100%;padding:15px;background:var(--gold);color:#14120a;border:none;border-radius:9px;font-weight:800;font-size:15px;letter-spacing:.01em;margin-top:6px;transition:.2s;}
+  .submit-btn:hover{background:var(--gold-bright);}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .form-msg{margin-top:14px;padding:12px 14px;border-radius:8px;font-size:13.5px;display:none;}
+  .form-msg.ok{display:block;background:var(--success-bg);color:var(--success);border:1px solid rgba(76,154,90,.3);}
+  .form-msg.err{display:block;background:var(--danger-bg);color:#e2857c;border:1px solid rgba(193,68,58,.3);}
+  .mystatus-list{margin-top:18px;display:flex;flex-direction:column;gap:10px;}
+  .mystatus-item{background:var(--bg-panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+  .badge{font-family:'JetBrains Mono';font-size:11px;padding:4px 10px;border-radius:100px;letter-spacing:.05em;font-weight:700;}
+  .badge.pending{background:rgba(201,162,39,.14);color:var(--gold-bright);}
+  .badge.approved{background:var(--success-bg);color:var(--success);}
+  .badge.rejected{background:var(--danger-bg);color:#e2857c;}
+  .reason-note{color:var(--muted);font-size:13px;width:100%;}
+  .call-link{color:var(--cyan);font-size:13px;width:100%;word-break:break-all;}
+  .app-type-badge{font-size:11px;padding:2px 10px;border-radius:100px;background:rgba(79,178,245,.12);color:var(--cyan);}
+  .app-type-badge.curator{background:var(--curator-bg);color:var(--curator);}
+  .app-type-badge.checker{background:var(--checker-bg);color:var(--checker);}
+  footer{border-top:1px solid var(--border-soft);padding:34px 0;margin-top:20px;}
+  .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;color:var(--muted-2);font-size:13px;}
+  .footer-inner a{color:var(--muted);}
+  .footer-inner a:hover{color:var(--gold-bright);}
+  .admin-wrap{max-width:920px;margin:0 auto;padding:60px 24px;}
+  .login-box{max-width:380px;margin:80px auto;background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:32px;}
+  .login-box h2{font-family:'Bebas Neue';font-size:26px;margin-bottom:6px;}
+  .login-box p{color:var(--muted);font-size:13.5px;margin-bottom:22px;}
+  .admin-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+  .admin-user{background:rgba(201,162,39,.12);border:1px solid rgba(201,162,39,.25);padding:6px 14px;border-radius:100px;font-size:13px;color:var(--gold-bright);}
+  .admin-user.curator{background:var(--curator-bg);border-color:rgba(139,92,246,.3);color:var(--curator);}
+  .admin-user.checker{background:var(--checker-bg);border-color:rgba(245,158,11,.3);color:var(--checker);}
+  .tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+  .tab-btn{padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-panel);color:var(--muted);font-size:13px;font-weight:600;}
+  .tab-btn.active{border-color:var(--gold);color:var(--gold-bright);background:rgba(201,162,39,.08);}
+  .settings-panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:26px;}
+  .settings-panel.curator-hidden{opacity:.5;pointer-events:none;}
+  .settings-panel.curator-hidden::after{content:"🔒 Только для админа";display:block;text-align:center;padding:8px;color:var(--muted);font-size:13px;background:rgba(0,0,0,.3);border-radius:6px;margin-top:10px;}
+  .toggle-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
+  @media (max-width:640px){.toggle-group{grid-template-columns:1fr;}}
+  .toggle-item{background:var(--bg-panel-2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .toggle-item .label{font-size:13px;font-weight:600;}
+  .toggle-item .label .sub{font-weight:400;color:var(--muted);font-size:11px;}
+  .switch{width:44px;height:24px;background:var(--bg-panel-2);border:1px solid var(--border);border-radius:100px;position:relative;cursor:pointer;flex-shrink:0;}
+  .switch.on{background:var(--success-bg);border-color:var(--success);}
+  .switch .knob{width:18px;height:18px;border-radius:50%;background:var(--muted);position:absolute;top:2px;left:2px;transition:.2s;}
+  .switch.on .knob{background:var(--success);left:22px;}
+  .app-card{background:var(--bg-panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;}
+  .app-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+  .app-name{font-weight:700;font-size:16px;}
+  .app-meta{color:var(--muted-2);font-size:12px;font-family:'JetBrains Mono';margin-top:2px;}
+  .app-fields{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+  @media (max-width:760px){.app-fields{grid-template-columns:1fr 1fr;}}
+  .app-fields .k{font-size:10.5px;color:var(--muted-2);text-transform:uppercase;letter-spacing:.08em;}
+  .app-fields .v{font-size:14px;font-weight:600;margin-top:2px;word-break:break-word;}
+  .app-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .btn-sm{padding:8px 14px;border-radius:7px;font-size:12.5px;font-weight:700;border:1px solid transparent;}
+  .btn-approve{background:var(--success-bg);color:var(--success);border-color:rgba(76,154,90,.3);}
+  .btn-approve:hover{background:var(--success);color:#0b1c0e;}
+  .btn-reject{background:var(--danger-bg);color:#e2857c;border-color:rgba(193,68,58,.3);}
+  .btn-reject:hover{background:var(--danger);color:#1c0b0a;}
+  .reject-box{display:flex;gap:8px;margin-top:10px;width:100%;}
+  .reject-box input{flex:1;background:var(--bg-panel-2);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:7px;font-size:13px;}
+  .empty-note{color:var(--muted-2);text-align:center;padding:40px 0;font-size:14px;}
+  .back-link{color:var(--muted);font-size:13px;margin-bottom:18px;display:inline-block;}
+  .back-link:hover{color:var(--gold-bright);}
+  .role-badge{font-size:11px;padding:3px 10px;border-radius:100px;font-weight:600;letter-spacing:.05em;}
+  .role-badge.admin{background:rgba(201,162,39,.15);color:var(--gold-bright);border:1px solid rgba(201,162,39,.2);}
+  .role-badge.curator{background:var(--curator-bg);color:var(--curator);border:1px solid rgba(139,92,246,.2);}
+  .sub-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .sub-tab{background:transparent;border:none;color:var(--muted);font-size:13px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;transition:.2s;}
+  .sub-tab.active{color:var(--gold-bright);background:rgba(201,162,39,.08);}
+  .sub-tab:hover{color:var(--text);}
+  .min-criteria{background:var(--bg-panel-2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--muted);}
+  .min-criteria strong{color:var(--gold-bright);}
+  .min-criteria .check{color:var(--success);}
+  .min-criteria .cross{color:var(--danger);}
+</style>
+</head>
+<body>
+
+<!-- LANDING VIEW -->
+<div id="landingView">
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="brand-mark" id="brandMark">M</div>
+        <div>
+          <div class="brand-name" id="brandName">MEDIA ACCESS</div>
+          <div class="brand-sub">Проверенный мод</div>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#about">О нас</a>
+        <a href="#status">Набор</a>
+        <a href="#channels">Каналы</a>
+        <a href="#apply" class="nav-cta">Подать заявку</a>
+        <a href="#" id="openAdminLink" style="font-size:12px;color:var(--muted-2);">Админ</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Мод прошёл проверку</div>
+        <h1>Снимай видео.<br>Получи <span class="accent">доступ</span>.</h1>
+        <p class="hero-desc">Мы отбираем медиа-авторов для съёмок с нашим модом. Заявки рассматриваются вручную — расскажите о своём канале, и мы дадим доступ к обзвону, если всё подходит.</p>
+        <div class="btn-row">
+          <a href="#apply" class="btn btn-primary">Подать заявку →</a>
+          <a href="#status" class="btn btn-ghost">Статус набора</a>
+        </div>
+      </div>
+      <div class="idcard" id="heroCard">
+        <div class="idcard-top">
+          <div>
+            <div class="idcard-label">Пропуск медиа-автора</div>
+            <div class="idcard-id" id="cardId">ID —</div>
+          </div>
+        </div>
+        <div class="idcard-stamp">PREVIEW</div>
+        <div class="idcard-avatar" id="cardAvatar">?</div>
+        <div class="idcard-name" id="cardName">Ваше имя</div>
+        <div class="idcard-role">Медиа-автор · заявка на рассмотрении</div>
+        <div class="idcard-grid">
+          <div class="idcard-field"><div class="k">Возраст</div><div class="v" id="cardAge">—</div></div>
+          <div class="idcard-field"><div class="k">Просмотры</div><div class="v" id="cardViews">—</div></div>
+          <div class="idcard-field"><div class="k">YouTube</div><div class="v" id="cardYoutube">—</div></div>
+          <div class="idcard-field"><div class="k">Вырезки</div><div class="v" id="cardClips">—</div></div>
+        </div>
+        <div class="idcard-barcode"></div>
+      </div>
+    </section>
+
+    <hr class="rule">
+    <section id="about">
+      <div class="section-head"><div class="section-eyebrow">О наборе</div><div class="section-title">Что мы предлагаем медиа</div><p class="section-desc">Мод регулярно проходит проверки, поэтому съёмки с ним безопасны для вашего канала и стабильны по контенту.</p></div>
+      <div class="about-grid">
+        <div class="about-card"><div class="num mono">01</div><h3>Проверенный мод</h3><p>Мод официально проходит проверки — можно снимать без риска для канала.</p></div>
+        <div class="about-card"><div class="num mono">02</div><h3>Личный отбор</h3><p>Каждую заявку смотрим вручную: канал, охваты и формат — не автоматика.</p></div>
+        <div class="about-card"><div class="num mono">03</div><h3>Доступ к обзвону</h3><p>Одобренные авторы получают доступ к закрытому Discord-каналу для обзвона.</p></div>
+      </div>
+    </section>
+
+    <hr class="rule">
+    <section id="status">
+      <div class="section-head"><div class="section-eyebrow">Новости</div><div class="section-title">Статус набора</div></div>
+      <div class="status-panel">
+        <div class="status-left"><div class="status-light" id="statusLight"></div><div><div class="status-title" id="statusTitle">Загрузка…</div><div class="status-sub">Обновляется администратором сайта</div></div></div>
+        <div class="status-announce" id="statusAnnounce"></div>
+      </div>
+    </section>
+
+    <hr class="rule">
+    <section id="channels">
+      <div class="section-head"><div class="section-eyebrow">Сообщество</div><div class="section-title">Наши каналы</div></div>
+      <div class="channel-row">
+        <a class="channel-card" id="discordChannelLink" target="_blank" rel="noopener"><div class="channel-ic ic-discord">D</div><div><div class="channel-name">Discord-канал</div><div class="channel-sub">Новости, общение, объявления</div></div><div class="channel-arrow">↗</div></a>
+        <a class="channel-card" id="telegramChannelLink" target="_blank" rel="noopener"><div class="channel-ic ic-tg">T</div><div><div class="channel-name">Telegram-канал</div><div class="channel-sub">Анонсы и апдейты мода</div></div><div class="channel-arrow">↗</div></a>
+      </div>
+    </section>
+
+    <hr class="rule">
+    <section id="apply">
+      <div class="section-head"><div class="section-eyebrow">Заявки</div><div class="section-title">Подайте заявку</div><p class="section-desc">Выберите тип заявки ниже.</p></div>
+      
+      <div class="apply-tabs">
+        <button class="apply-tab active" data-form="media">🎬 Медиа-автор</button>
+        <button class="apply-tab" data-form="curator">🎯 Зам. куратора</button>
+        <button class="apply-tab" data-form="checker">🔍 Проверяющий</button>
+      </div>
+
+      <!-- Форма для Медиа -->
+      <div class="apply-grid" id="mediaForm">
+        <div class="form-panel">
+          <form id="mediaApplyForm">
+            <div class="field-row">
+              <div class="field"><label>Имя</label><input type="text" id="mName" required placeholder="Как к вам обращаться"></div>
+              <div class="field"><label>Возраст</label><input type="number" id="mAge" required min="1" max="120" placeholder="18"></div>
+            </div>
+            <div class="field"><label>Ссылка на YouTube-канал</label><input type="url" id="mYoutube" required placeholder="https://youtube.com/@channel"></div>
+            <div class="field"><label>Стабильные просмотры на видео</label><input type="text" id="mViews" required placeholder="напр. 5 000–8 000"></div>
+            <div class="field"><label>Сколько вырезок с нашим модом готовы выпускать</label><div class="clip-row"><input type="number" id="mClipsCount" required min="1" placeholder="3"><select id="mClipsPeriod"><option value="в неделю">в неделю</option><option value="в месяц">в месяц</option></select></div></div>
+            <button type="submit" class="submit-btn" id="mediaSubmitBtn">Отправить заявку</button>
+            <div class="form-msg" id="mediaFormMsg"></div>
+          </form>
+        </div>
+        <div><p style="color:var(--muted);font-size:13.5px;margin-bottom:14px;">Заявка на медиа-автора.</p></div>
+      </div>
+
+      <!-- Форма для Зам. куратора -->
+      <div class="apply-grid hidden" id="curatorForm">
+        <div class="form-panel">
+          <form id="curatorApplyForm">
+            <div class="field-row">
+              <div class="field"><label>Имя</label><input type="text" id="cName" required placeholder="Как к вам обращаться"></div>
+              <div class="field"><label>Возраст</label><input type="number" id="cAge" required min="1" max="120" placeholder="18"></div>
+            </div>
+            <div class="field"><label>Какой у вас опыт в модерации/администрировании?</label><textarea id="cExperience" required placeholder="Напишите о своём опыте…"></textarea></div>
+            <div class="field"><label>Как вы поможете проекту в роли зам. куратора?</label><textarea id="cHelp" required placeholder="Опишите, что вы можете сделать для проекта…"></textarea></div>
+            <button type="submit" class="submit-btn" id="curatorSubmitBtn">Отправить заявку</button>
+            <div class="form-msg" id="curatorFormMsg"></div>
+          </form>
+        </div>
+        <div><p style="color:var(--muted);font-size:13.5px;margin-bottom:14px;">Заявка на позицию Зам. куратора.</p></div>
+      </div>
+
+      <!-- Форма для Проверяющего -->
+      <div class="apply-grid hidden" id="checkerForm">
+        <div class="form-panel">
+          <div class="min-criteria">
+            <strong>📋 Минимальные критерии:</strong><br>
+            <span class="check">✅</span> Возраст <strong>от 14 лет</strong><br>
+            <span class="check">✅</span> Операционная система <strong>Linux</strong><br>
+            <span class="check">✅</span> Готовность уделять <strong>минимум 4 часа в день</strong>
+          </div>
+          <form id="checkerApplyForm">
+            <div class="field-row">
+              <div class="field"><label>Имя</label><input type="text" id="chName" required placeholder="Как к вам обращаться"></div>
+              <div class="field"><label>Возраст</label><input type="number" id="chAge" required min="1" max="120" placeholder="14"></div>
+            </div>
+            <div class="field"><label>Сколько времени готовы уделять проекту в день?</label><input type="text" id="chTime" required placeholder="напр. 4-5 часов"></div>
+            <div class="field"><label>Какая у вас операционная система?</label>
+              <select id="chOS" required>
+                <option value="">Выберите ОС</option>
+                <option value="Linux">Linux</option>
+                <option value="Windows">Windows</option>
+                <option value="macOS">macOS</option>
+                <option value="Другая">Другая</option>
+              </select>
+            </div>
+            <div class="field"><label>Готовы ли вы сменить ОС на Linux (если сейчас не Linux)?</label>
+              <select id="chChangeOS" required>
+                <option value="">Выберите вариант</option>
+                <option value="Да">Да, готов(а)</option>
+                <option value="Нет">Нет</option>
+                <option value="Уже использую Linux">Уже использую Linux</option>
+              </select>
+            </div>
+            <button type="submit" class="submit-btn" id="checkerSubmitBtn">Отправить заявку</button>
+            <div class="form-msg" id="checkerFormMsg"></div>
+          </form>
+        </div>
+        <div><p style="color:var(--muted);font-size:13.5px;margin-bottom:14px;">Заявка на позицию Проверяющего.</p></div>
+      </div>
+    </section>
+
+    <hr class="rule">
+    <section id="mystatus">
+      <div class="section-head"><div class="section-eyebrow">Проверка</div><div class="section-title">Мои заявки</div><p class="section-desc">Статус всех ваших заявок.</p></div>
+      <div class="mystatus-list" id="myStatusList"><div class="empty-note">Заявок пока нет</div></div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div>© <span id="year"></span> Медиа-набор. Все заявки рассматриваются вручную.</div>
+      <div>По вопросам сайта — Discord <a href="https://discord.com/users/" target="_blank" rel="noopener" id="siteAdminLink">chmo77887</a> · <a href="#" id="openAdminLink2">Админ-панель</a></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ADMIN LOGIN VIEW -->
+<div id="adminLoginView" class="hidden">
+  <div class="admin-wrap">
+    <a href="#" class="back-link" id="backFromLogin">← На главную</a>
+    <div class="login-box">
+      <h2>Вход для администратора</h2>
+      <p>Доступ только для почт из списка администраторов или зам. кураторов.</p>
+      <div class="field"><label>Почта</label><input type="email" id="adminEmail" placeholder="you@example.com"></div>
+      <button class="submit-btn" id="adminLoginBtn">Войти</button>
+      <div class="form-msg" id="adminLoginMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD VIEW -->
+<div id="adminDashView" class="hidden">
+  <div class="admin-wrap">
+    <div class="admin-topbar">
+      <div><a href="#" class="back-link" id="backFromDash">← На главную</a><div class="section-title" style="font-size:28px;">Панель управления</div></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span class="admin-user" id="adminEmailShown">Вы вошли как admin@example.com</span>
+        <span class="role-badge" id="roleBadge">👑 Админ</span>
+        <button class="btn btn-ghost" id="adminLogoutBtn" style="padding:9px 16px;font-size:13px;">Выйти</button>
+      </div>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:12px;">⚙️ Управление наборами</div>
+      <div class="toggle-group">
+        <div class="toggle-item">
+          <div class="label">🎬 Медиа<br><span class="sub">заявки открыты</span></div>
+          <div class="switch" id="switchMedia"><div class="knob"></div></div>
+        </div>
+        <div class="toggle-item">
+          <div class="label">🎯 Зам. куратора<br><span class="sub">заявки открыты</span></div>
+          <div class="switch" id="switchCurator"><div class="knob"></div></div>
+        </div>
+        <div class="toggle-item">
+          <div class="label">🔍 Проверяющий<br><span class="sub">заявки открыты</span></div>
+          <div class="switch" id="switchChecker"><div class="knob"></div></div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Текст объявления (необязательно)</label>
+        <input type="text" id="announceInput" placeholder="напр. Набор временно приостановлен">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Ссылка на допуск к обзвону (выдаётся одобренным)</label>
+        <input type="text" id="callLinkInput" placeholder="https://discord.gg/...">
+      </div>
+      <button class="btn btn-primary" id="saveSettingsBtn" style="padding:11px 20px;font-size:13.5px;">Сохранить</button>
+      <span class="mono" id="settingsSavedNote" style="color:var(--success);font-size:12.5px;margin-left:12px;display:none;">Сохранено ✓</span>
+    </div>
+
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-type="media">🎬 Медиа</button>
+      <button class="sub-tab" data-type="curator">🎯 Зам. куратора</button>
+      <button class="sub-tab" data-type="checker">🔍 Проверяющий</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-filter="all">Все</button>
+      <button class="tab-btn" data-filter="pending">На рассмотрении</button>
+      <button class="tab-btn" data-filter="approved">Одобрено</button>
+      <button class="tab-btn" data-filter="rejected">Отклонено</button>
+      <button class="tab-btn" data-filter="my">Мои заявки</button>
+    </div>
+
+    <div id="appsList"></div>
+  </div>
+</div>
+
+<script>
+/* ======================= НАСТРОЙКИ ======================= */
+const CONFIG = {
+  modName: "StealthBypass",
+  discordChannelUrl: "https://discord.gg/REPLACE_ME",
+  telegramUrl: "https://t.me/REPLACE_ME",
+  siteAdminDiscordTag: "chmo77887",
+  defaultCallLink: "https://discord.gg/mJEPkeKVQ",
+  admins: ["admin@example.com"],
+  curators: ["krust@example.com"],
+};
+/* ========================================================= */
+
+document.getElementById('brandName').textContent = CONFIG.modName;
+document.getElementById('brandMark').textContent = CONFIG.modName.trim()[0]?.toUpperCase() || 'M';
+document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('discordChannelLink').href = CONFIG.discordChannelUrl;
+document.getElementById('telegramChannelLink').href = CONFIG.telegramUrl;
+
+/* ---------- storage ---------- */
+function lsGet(key){ try{ return JSON.parse(localStorage.getItem(key)); }catch(e){ return null; } }
+function lsSet(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+/* ---------- admin-config ---------- */
+const DEFAULT_CONFIG = { 
+  recruitmentOpen: true, 
+  announcement: '', 
+  callLink: CONFIG.defaultCallLink,
+  mediaOpen: true,
+  curatorOpen: true,
+  checkerOpen: true
+};
+function getAdminConfig(){ const raw = lsGet('admin-config'); return raw ? { ...DEFAULT_CONFIG, ...raw } : { ...DEFAULT_CONFIG }; }
+function setAdminConfig(cfg){ lsSet('admin-config', cfg); }
+
+/* ---------- render status ---------- */
+function renderStatus(){
+  const cfg = getAdminConfig();
+  const light = document.getElementById('statusLight');
+  const title = document.getElementById('statusTitle');
+  const announce = document.getElementById('statusAnnounce');
+  
+  // Главный статус (для обратной совместимости)
+  const anyOpen = cfg.mediaOpen || cfg.curatorOpen || cfg.checkerOpen;
+  if(anyOpen){ light.className = 'status-light open'; title.textContent = 'Набор открыт'; }
+  else { light.className = 'status-light closed'; title.textContent = 'Набор закрыт'; }
+  
+  announce.textContent = cfg.announcement || '';
+  announce.style.display = cfg.announcement ? 'block' : 'none';
+}
+
+/* ---------- live card ---------- */
+const mName = document.getElementById('mName');
+const mAge = document.getElementById('mAge');
+const mYoutube = document.getElementById('mYoutube');
+const mViews = document.getElementById('mViews');
+const mClipsCount = document.getElementById('mClipsCount');
+const mClipsPeriod = document.getElementById('mClipsPeriod');
+
+function updateCard(){
+  const name = mName.value.trim();
+  document.getElementById('cardName').textContent = name || 'Ваше имя';
+  document.getElementById('cardAvatar').textContent = name ? name[0].toUpperCase() : '?';
+  document.getElementById('cardAge').textContent = mAge.value || '—';
+  document.getElementById('cardViews').textContent = mViews.value || '—';
+  document.getElementById('cardYoutube').textContent = mYoutube.value ? mYoutube.value.replace(/^https?:\/\//,'').slice(0,26) : '—';
+  document.getElementById('cardClips').textContent = mClipsCount.value ? `${mClipsCount.value} ${mClipsPeriod.value}` : '—';
+}
+[mName, mAge, mYoutube, mViews, mClipsCount, mClipsPeriod].forEach(el => el.addEventListener('input', updateCard));
+
+function genId(){ return 'app_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+
+/* ---------- submit ---------- */
+function getApps(){ return lsGet('applications') || {}; }
+function setApps(apps){ lsSet('applications', apps); }
+
+let currentUserEmail = null;
+let currentUserRole = null;
+
+function getUserRole(email){
+  if(!email) return null;
+  if(CONFIG.admins.map(e => e.toLowerCase()).includes(email.toLowerCase())) return 'admin';
+  if(CONFIG.curators.map(e => e.toLowerCase()).includes(email.toLowerCase())) return 'curator';
+  return null;
+}
+
+// Переключение между формами
+document.querySelectorAll('.apply-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.apply-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const type = tab.dataset.form;
+    document.getElementById('mediaForm').classList.toggle('hidden', type !== 'media');
+    document.getElementById('curatorForm').classList.toggle('hidden', type !== 'curator');
+    document.getElementById('checkerForm').classList.toggle('hidden', type !== 'checker');
+    updateSubmitButtons();
+  });
+});
+
+function isFormOpen(type){
+  const cfg = getAdminConfig();
+  if(type === 'media') return cfg.mediaOpen !== false;
+  if(type === 'curator') return cfg.curatorOpen !== false;
+  if(type === 'checker') return cfg.checkerOpen !== false;
+  return true;
+}
+
+function updateSubmitButtons(){
+  const mediaBtn = document.getElementById('mediaSubmitBtn');
+  const curatorBtn = document.getElementById('curatorSubmitBtn');
+  const checkerBtn = document.getElementById('checkerSubmitBtn');
+  
+  mediaBtn.disabled = !isFormOpen('media');
+  mediaBtn.textContent = isFormOpen('media') ? 'Отправить заявку' : '❌ Набор закрыт';
+  
+  curatorBtn.disabled = !isFormOpen('curator');
+  curatorBtn.textContent = isFormOpen('curator') ? 'Отправить заявку' : '❌ Набор закрыт';
+  
+  checkerBtn.disabled = !isFormOpen('checker');
+  checkerBtn.textContent = isFormOpen('checker') ? 'Отправить заявку' : '❌ Набор закрыт';
+}
+
+// Отправка медиа-заявки
+document.getElementById('mediaApplyForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('mediaFormMsg');
+  if(!isFormOpen('media')){
+    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на медиа сейчас закрыт.';
+    return;
+  }
+  const email = document.getElementById('adminEmail').value.trim() || 'anonymous';
+  const id = genId();
+  const app = {
+    id, type: 'media',
+    name: mName.value.trim(), age: mAge.value,
+    youtube: mYoutube.value.trim(), views: mViews.value.trim(),
+    clips: `${mClipsCount.value} ${mClipsPeriod.value}`,
+    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: email
+  };
+  const apps = getApps();
+  apps[id] = app;
+  setApps(apps);
+  msg.className = 'form-msg ok';
+  msg.textContent = '✅ Заявка отправлена!';
+  document.getElementById('mediaApplyForm').reset();
+  updateCard();
+  renderMyStatus(email);
+});
+
+// Отправка заявки на зам. куратора
+document.getElementById('curatorApplyForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('curatorFormMsg');
+  if(!isFormOpen('curator')){
+    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на зам. куратора сейчас закрыт.';
+    return;
+  }
+  const email = document.getElementById('adminEmail').value.trim() || 'anonymous';
+  const id = genId();
+  const app = {
+    id, type: 'curator',
+    name: document.getElementById('cName').value.trim(),
+    age: document.getElementById('cAge').value,
+    experience: document.getElementById('cExperience').value.trim(),
+    help: document.getElementById('cHelp').value.trim(),
+    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: email
+  };
+  const apps = getApps();
+  apps[id] = app;
+  setApps(apps);
+  msg.className = 'form-msg ok';
+  msg.textContent = '✅ Заявка на зам. куратора отправлена!';
+  document.getElementById('curatorApplyForm').reset();
+  renderMyStatus(email);
+});
+
+// Отправка заявки на проверяющего
+document.getElementById('checkerApplyForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('checkerFormMsg');
+  if(!isFormOpen('checker')){
+    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на проверяющего сейчас закрыт.';
+    return;
+  }
+  const email = document.getElementById('adminEmail').value.trim() || 'anonymous';
+  const id = genId();
+  const app = {
+    id, type: 'checker',
+    name: document.getElementById('chName').value.trim(),
+    age: document.getElementById('chAge').value,
+    time: document.getElementById('chTime').value.trim(),
+    os: document.getElementById('chOS').value,
+    changeOS: document.getElementById('chChangeOS').value,
+    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: email
+  };
+  
+  const ageOk = parseInt(app.age) >= 14;
+  const osOk = app.os === 'Linux' || app.changeOS === 'Да' || app.changeOS === 'Уже использую Linux';
+  const timeOk = parseInt(app.time) >= 4;
+  
+  if(!ageOk || !osOk || !timeOk){
+    msg.className = 'form-msg err';
+    let errText = '❌ Вы не проходите минимальные критерии:\n';
+    if(!ageOk) errText += ' - Возраст должен быть от 14 лет\n';
+    if(!osOk) errText += ' - Нужна ОС Linux или готовность перейти на неё\n';
+    if(!timeOk) errText += ' - Нужно уделять минимум 4 часа в день\n';
+    msg.textContent = errText;
+    return;
+  }
+  
+  const apps = getApps();
+  apps[id] = app;
+  setApps(apps);
+  msg.className = 'form-msg ok';
+  msg.textContent = '✅ Заявка на проверяющего отправлена!';
+  document.getElementById('checkerApplyForm').reset();
+  renderMyStatus(email);
+});
+
+/* ---------- my status ---------- */
+function renderMyStatus(email){
+  const wrap = document.getElementById('myStatusList');
+  const apps = getApps();
+  const my = Object.values(apps).filter(a => a.submittedBy === (email || 'anonymous'));
+  if(!my.length){ wrap.innerHTML = '<div class="empty-note">Заявок пока нет</div>'; return; }
+  wrap.innerHTML = my.slice().reverse().map(a => {
+    const badgeClass = a.status === 'approved' ? 'approved' : a.status === 'rejected' ? 'rejected' : 'pending';
+    const badgeText = a.status === 'approved' ? 'Одобрено ✅' : a.status === 'rejected' ? 'Отклонено ❌' : 'На рассмотрении ⏳';
+    const typeLabels = {
+      'media': '🎬 Медиа',
+      'curator': '🎯 Зам. куратора',
+      'checker': '🔍 Проверяющий'
+    };
+    const typeLabel = typeLabels[a.type] || a.type;
+    let extra = '';
+    if(a.status === 'rejected' && a.reason) extra = `<div class="reason-note">Причина: ${escapeHtml(a.reason)}</div>`;
+    if(a.status === 'approved'){
+      extra = `<div class="call-link">✅ Допуск к обзвону: <a href="${escapeAttr(a.callLink || CONFIG.defaultCallLink)}" target="_blank" rel="noopener" style="color:var(--cyan);font-weight:600;">${escapeHtml(a.callLink || CONFIG.defaultCallLink)}</a></div>`;
+    }
+    return `<div class="mystatus-item"><div><strong>${escapeHtml(a.name)}</strong> <span class="mono" style="color:var(--muted-2);font-size:12px;">· ${typeLabel}</span></div><span class="badge ${badgeClass}">${badgeText}</span>${extra}</div>`;
+  }).join('');
+}
+function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s){ return escapeHtml(s); }
+
+/* ---------- view switching ---------- */
+function showView(view){
+  document.getElementById('landingView').classList.toggle('hidden', view !== 'landing');
+  document.getElementById('adminLoginView').classList.toggle('hidden', view !== 'login');
+  document.getElementById('adminDashView').classList.toggle('hidden', view !== 'dash');
+  window.scrollTo(0,0);
+}
+document.getElementById('openAdminLink').addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
+document.getElementById('openAdminLink2').addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
+document.getElementById('backFromLogin').addEventListener('click', (e) => { e.preventDefault(); showView('landing'); });
+document.getElementById('backFromDash').addEventListener('click', (e) => { e.preventDefault(); showView('landing'); });
+
+/* ---------- admin login ---------- */
+document.getElementById('adminLoginBtn').addEventListener('click', () => {
+  const val = document.getElementById('adminEmail').value.trim().toLowerCase();
+  const msg = document.getElementById('adminLoginMsg');
+  if(!val){ msg.className = 'form-msg err'; msg.textContent = 'Введите почту.'; return; }
+  const role = getUserRole(val);
+  if(role){
+    currentUserEmail = val;
+    currentUserRole = role;
+    const roleLabel = role === 'admin' ? '👑 Админ' : '🎯 Зам. куратора';
+    document.getElementById('adminEmailShown').textContent = 'Вы вошли как ' + val;
+    document.getElementById('roleBadge').textContent = roleLabel;
+    document.getElementById('roleBadge').className = 'role-badge ' + role;
+    document.getElementById('adminEmailShown').className = 'admin-user' + (role === 'curator' ? ' curator' : '');
+    showView('dash');
+    loadAdminDashboard();
+  }else{
+    msg.className = 'form-msg err'; msg.textContent = 'Эта почта не имеет доступа.';
+  }
+});
+document.getElementById('adminLogoutBtn').addEventListener('click', () => {
+  currentUserEmail = null;
+  currentUserRole = null;
+  document.getElementById('adminEmail').value = '';
+  showView('landing');
+});
+
+/* ---------- admin settings ---------- */
+let switchStates = { media: true, curator: true, checker: true };
+
+// Загружаем состояния переключателей
+function loadSwitchStates(){
+  const cfg = getAdminConfig();
+  switchStates.media = cfg.mediaOpen !== false;
+  switchStates.curator = cfg.curatorOpen !== false;
+  switchStates.checker = cfg.checkerOpen !== false;
+  
+  document.getElementById('switchMedia').classList.toggle('on', switchStates.media);
+  document.getElementById('switchCurator').classList.toggle('on', switchStates.curator);
+  document.getElementById('switchChecker').classList.toggle('on', switchStates.checker);
+}
+
+// Переключатели
+document.getElementById('switchMedia').addEventListener('click', () => {
+  if(currentUserRole === 'curator') return;
+  switchStates.media = !switchStates.media;
+  document.getElementById('switchMedia').classList.toggle('on', switchStates.media);
+  updateSubmitButtons();
+});
+document.getElementById('switchCurator').addEventListener('click', () => {
+  if(currentUserRole === 'curator') return;
+  switchStates.curator = !switchStates.curator;
+  document.getElementById('switchCurator').classList.toggle('on', switchStates.curator);
+  updateSubmitButtons();
+});
+document.getElementById('switchChecker').addEventListener('click', () => {
+  if(currentUserRole === 'curator') return;
+  switchStates.checker = !switchStates.checker;
+  document.getElementById('switchChecker').classList.toggle('on', switchStates.checker);
+  updateSubmitButtons();
+});
+
+document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+  if(currentUserRole === 'curator') return;
+  const cfg = {
+    mediaOpen: switchStates.media,
+    curatorOpen: switchStates.curator,
+    checkerOpen: switchStates.checker,
+    announcement: document.getElementById('announceInput').value.trim(),
+    callLink: document.getElementById('callLinkInput').value.trim() || CONFIG.defaultCallLink,
+  };
+  setAdminConfig(cfg);
+  const note = document.getElementById('settingsSavedNote');
+  note.style.display = 'inline';
+  setTimeout(() => note.style.display = 'none', 2000);
+  renderStatus();
+  updateSubmitButtons();
+});
+
+/* ---------- admin dashboard ---------- */
+let allApps = [];
+let currentFilter = 'all';
+let currentType = 'media';
+
+function loadAdminDashboard(){
+  const cfg = getAdminConfig();
+  document.getElementById('announceInput').value = cfg.announcement || '';
+  document.getElementById('callLinkInput').value = cfg.callLink || CONFIG.defaultCallLink;
+  
+  loadSwitchStates();
+  updateSubmitButtons();
+
+  if(currentUserRole === 'curator'){
+    document.getElementById('settingsPanel').classList.add('curator-hidden');
+  }else{
+    document.getElementById('settingsPanel').classList.remove('curator-hidden');
+  }
+
+  const apps = getApps();
+  allApps = Object.values(apps);
+  allApps.sort((a,b) => b.submittedAt - a.submittedAt);
+  renderApps();
+}
+
+function renderApps(){
+  const list = document.getElementById('appsList');
+  let filtered = allApps.filter(a => a.type === currentType);
+  
+  if(currentFilter === 'my'){
+    filtered = filtered.filter(a => a.submittedBy === currentUserEmail);
+  }else if(currentFilter !== 'all'){
+    filtered = filtered.filter(a => a.status === currentFilter);
+  }
+  
+  if(!filtered.length){ list.innerHTML = '<div class="empty-note">Заявок нет</div>'; return; }
+  
+  list.innerHTML = filtered.map(a => {
+    const date = new Date(a.submittedAt).toLocaleString('ru-RU');
+    const badgeClass = a.status === 'approved' ? 'approved' : a.status === 'rejected' ? 'rejected' : 'pending';
+    const badgeText = a.status === 'approved' ? 'Одобрено ✅' : a.status === 'rejected' ? 'Отклонено ❌' : 'На рассмотрении ⏳';
+    const showApprove = a.status !== 'approved' && currentUserRole !== null && (currentUserRole === 'admin' || a.type === 'media');
+    const showReject = a.status !== 'rejected' && currentUserRole === 'admin';
+    
+    let typeClass = 'app-type-badge';
+    if(a.type === 'curator') typeClass += ' curator';
+    if(a.type === 'checker') typeClass += ' checker';
+    const typeLabels = {
+      'media': '🎬 Медиа',
+      'curator': '🎯 Зам. куратора',
+      'checker': '🔍 Проверяющий'
+    };
+    
+    let fields = '';
+    if(a.type === 'media'){
+      fields = `
+        <div><div class="k">YouTube</div><div class="v"><a href="${escapeAttr(a.youtube)}" target="_blank" rel="noopener" style="color:var(--cyan);">ссылка</a></div></div>
+        <div><div class="k">Просмотры</div><div class="v">${escapeHtml(a.views)}</div></div>
+        <div><div class="k">Вырезки</div><div class="v">${escapeHtml(a.clips)}</div></div>
+        <div><div class="k">Статус</div><div class="v">${badgeText}</div></div>
+      `;
+    }else if(a.type === 'curator'){
+      fields = `
+        <div><div class="k">Опыт</div><div class="v">${escapeHtml(a.experience || '—')}</div></div>
+        <div><div class="k">Как поможет</div><div class="v">${escapeHtml(a.help || '—')}</div></div>
+        <div><div class="k">Статус</div><div class="v">${badgeText}</div></div>
+        <div><div class="k">Тип</div><div class="v">🎯 Зам. куратора</div></div>
+      `;
+    }else{
+      fields = `
+        <div><div class="k">Время в день</div><div class="v">${escapeHtml(a.time || '—')}</div></div>
+        <div><div class="k">ОС</div><div class="v">${escapeHtml(a.os || '—')}</div></div>
+        <div><div class="k">Сменит ОС</div><div class="v">${escapeHtml(a.changeOS || '—')}</div></div>
+        <div><div class="k">Статус</div><div class="v">${badgeText}</div></div>
+      `;
+    }
+    
+    let extra = '';
+    if(a.status === 'rejected' && a.reason) extra = `<div style="color:var(--muted);font-size:13px;margin-bottom:10px;">❌ Причина: ${escapeHtml(a.reason)}</div>`;
+    if(a.status === 'approved'){
+      extra = `<div style="color:var(--success);font-size:13px;margin-bottom:10px;">✅ Допуск к обзвону: <a href="${escapeAttr(a.callLink || CONFIG.defaultCallLink)}" target="_blank" rel="noopener" style="color:var(--cyan);">${escapeHtml(a.callLink || CONFIG.defaultCallLink)}</a></div>`;
+    }
+    
+    return `<div class="app-card" data-id="${a.id}">
+      <div class="app-top"><div><div class="app-name">${escapeHtml(a.name)}, ${escapeHtml(a.age)} лет</div><div class="app-meta">${date} · ${escapeHtml(a.submittedBy)} <span class="${typeClass}">${typeLabels[a.type]}</span></div></div><span class="badge ${badgeClass}">${badgeText}</span></div>
+      <div class="app-fields">${fields}</div>
+      ${extra}
+      <div class="app-actions">
+        ${showApprove ? `<button class="btn-sm btn-approve" data-action="approve" data-id="${a.id}">✅ Одобрить</button>` : ''}
+        ${showReject ? `<button class="btn-sm btn-reject" data-action="reject-toggle" data-id="${a.id}">❌ Отклонить</button>` : ''}
+        ${!showApprove && a.status === 'approved' ? `<span style="color:var(--muted-2);font-size:12px;">✅ Уже одобрено</span>` : ''}
+        ${!showReject && a.status === 'rejected' ? `<span style="color:var(--muted-2);font-size:12px;">❌ Уже отклонено</span>` : ''}
+      </div>
+      <div class="reject-box hidden" id="rejectBox-${a.id}"><input type="text" placeholder="Причина отказа" id="rejectReason-${a.id}"><button class="btn-sm btn-reject" data-action="reject-confirm" data-id="${a.id}">Подтвердить</button></div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('appsList').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+  const apps = getApps();
+  const app = apps[id];
+  if(!app) return;
+  
+  if(action === 'approve'){
+    const cfg = getAdminConfig();
+    app.status = 'approved';
+    app.reason = '';
+    app.callLink = cfg.callLink || CONFIG.defaultCallLink;
+    setApps(apps);
+    renderApps();
+    renderMyStatus(app.submittedBy);
+  }
+  if(action === 'reject-toggle'){
+    if(currentUserRole !== 'admin') return;
+    document.getElementById('rejectBox-' + id).classList.toggle('hidden');
+  }
+  if(action === 'reject-confirm'){
+    if(currentUserRole !== 'admin') return;
+    const reason = document.getElementById('rejectReason-' + id).value.trim();
+    if(!reason) return;
+    app.status = 'rejected';
+    app.reason = reason;
+    app.callLink = '';
+    setApps(apps);
+    renderApps();
+    renderMyStatus(app.submittedBy);
+  }
+});
+
+// Переключение между типами заявок в админке
+document.querySelectorAll('.sub-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentType = tab.dataset.type;
+    renderApps();
+  });
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderApps();
+  });
+});
+
+/* ---------- init ---------- */
+renderStatus();
+renderMyStatus('anonymous');
+updateSubmitButtons();
+</script>
+</body>
+</html>
