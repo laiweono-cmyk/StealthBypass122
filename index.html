@@ -468,6 +468,9 @@ const CONFIG = {
   defaultCallLink: "https://discord.gg/mJEPkeKVQ",
   admins: ["admin@example.com"],
   curators: ["krust@example.com"],
+  // JSONBin
+  JSONBIN_BIN_ID: "6a7db383f5f4af5e2910e91e",
+  JSONBIN_API_KEY: "$2a$10$J1tAnCantpwHPryv7Vjc0OOKFXt8lzNJPDg3asmqmoOdXfX94soeK"
 };
 /* ========================================================= */
 
@@ -476,6 +479,42 @@ document.getElementById('brandMark').textContent = CONFIG.modName.trim()[0]?.toU
 document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('discordChannelLink').href = CONFIG.discordChannelUrl;
 document.getElementById('telegramChannelLink').href = CONFIG.telegramUrl;
+
+/* ---------- JSONBin ---------- */
+async function loadConfigFromCloud(){
+  try{
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': CONFIG.JSONBIN_API_KEY }
+    });
+    if(!res.ok) return false;
+    const data = await res.json();
+    if(data.record){
+      localStorage.setItem('admin-config', JSON.stringify(data.record));
+      return true;
+    }
+    return false;
+  }catch(e){
+    console.warn('Cloud load error:', e);
+    return false;
+  }
+}
+
+async function saveConfigToCloud(cfg){
+  try{
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': CONFIG.JSONBIN_API_KEY
+      },
+      body: JSON.stringify(cfg)
+    });
+    return res.ok;
+  }catch(e){
+    console.warn('Cloud save error:', e);
+    return false;
+  }
+}
 
 /* ---------- storage ---------- */
 function lsGet(key){ try{ return JSON.parse(localStorage.getItem(key)); }catch(e){ return null; } }
@@ -489,8 +528,17 @@ const DEFAULT_CONFIG = {
   announcement: '', 
   callLink: CONFIG.defaultCallLink
 };
-function getAdminConfig(){ const raw = lsGet('admin-config'); return raw ? { ...DEFAULT_CONFIG, ...raw } : { ...DEFAULT_CONFIG }; }
-function setAdminConfig(cfg){ lsSet('admin-config', cfg); }
+
+function getAdminConfig(){ 
+  const raw = lsGet('admin-config'); 
+  return raw ? { ...DEFAULT_CONFIG, ...raw } : { ...DEFAULT_CONFIG }; 
+}
+
+function setAdminConfig(cfg){ 
+  lsSet('admin-config', cfg); 
+  // Сохраняем в облако
+  saveConfigToCloud(cfg);
+}
 
 /* ---------- render status ---------- */
 function renderStatus(){
@@ -755,6 +803,10 @@ document.getElementById('switchMedia').addEventListener('click', () => {
   if(currentUserRole === 'curator') return;
   switchStates.media = !switchStates.media;
   document.getElementById('switchMedia').classList.toggle('on', switchStates.media);
+  // Сохраняем в облако
+  const cfg = getAdminConfig();
+  cfg.mediaOpen = switchStates.media;
+  setAdminConfig(cfg);
   updateSubmitButtons();
   renderStatus();
 });
@@ -762,6 +814,9 @@ document.getElementById('switchCurator').addEventListener('click', () => {
   if(currentUserRole === 'curator') return;
   switchStates.curator = !switchStates.curator;
   document.getElementById('switchCurator').classList.toggle('on', switchStates.curator);
+  const cfg = getAdminConfig();
+  cfg.curatorOpen = switchStates.curator;
+  setAdminConfig(cfg);
   updateSubmitButtons();
   renderStatus();
 });
@@ -769,6 +824,9 @@ document.getElementById('switchChecker').addEventListener('click', () => {
   if(currentUserRole === 'curator') return;
   switchStates.checker = !switchStates.checker;
   document.getElementById('switchChecker').classList.toggle('on', switchStates.checker);
+  const cfg = getAdminConfig();
+  cfg.checkerOpen = switchStates.checker;
+  setAdminConfig(cfg);
   updateSubmitButtons();
   renderStatus();
 });
@@ -942,9 +1000,15 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 /* ---------- init ---------- */
-renderStatus();
-renderMyStatus();
-updateSubmitButtons();
+// Загружаем статус из облака при старте
+async function init(){
+  await loadConfigFromCloud();
+  renderStatus();
+  renderMyStatus();
+  updateSubmitButtons();
+}
+
+init();
 </script>
 </body>
 </html>
