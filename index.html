@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StealthBypass — медиа-набор</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StealthBypass — медиа-набор</title>
+  
+  <!-- ОТКЛЮЧЕНИЕ КЕШИРОВАНИЯ -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0b0e11;
@@ -536,7 +542,6 @@ function getAdminConfig(){
 
 function setAdminConfig(cfg){ 
   lsSet('admin-config', cfg); 
-  // Сохраняем в облако
   saveConfigToCloud(cfg);
 }
 
@@ -803,7 +808,6 @@ document.getElementById('switchMedia').addEventListener('click', () => {
   if(currentUserRole === 'curator') return;
   switchStates.media = !switchStates.media;
   document.getElementById('switchMedia').classList.toggle('on', switchStates.media);
-  // Сохраняем в облако
   const cfg = getAdminConfig();
   cfg.mediaOpen = switchStates.media;
   setAdminConfig(cfg);
@@ -1000,12 +1004,23 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 /* ---------- init ---------- */
-// Загружаем статус из облака при старте
 async function init(){
   await loadConfigFromCloud();
   renderStatus();
   renderMyStatus();
   updateSubmitButtons();
+  
+  // Автообновление каждые 15 секунд (проверка статуса)
+  let lastStatus = JSON.stringify(getAdminConfig());
+  setInterval(async () => {
+    await loadConfigFromCloud();
+    const newStatus = JSON.stringify(getAdminConfig());
+    if(newStatus !== lastStatus){
+      lastStatus = newStatus;
+      renderStatus();
+      updateSubmitButtons();
+    }
+  }, 15000);
 }
 
 init();
