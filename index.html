@@ -127,9 +127,10 @@
   .field textarea{min-height:80px;resize:vertical;}
   .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   @media (max-width:520px){.field-row{grid-template-columns:1fr;}}
-  .submit-btn{width:100%;padding:15px;background:var(--gold);color:#14120a;border:none;border-radius:9px;font-weight:800;font-size:15px;letter-spacing:.01em;margin-top:6px;transition:.2s;}
+  .submit-btn{width:100%;padding:15px;background:var(--gold);color:#14120a;border:none;border-radius:9px;font-weight:800;font-size:15px;letter-spacing:.01em;margin-top:6px;transition:.2s;cursor:pointer;}
   .submit-btn:hover{background:var(--gold-bright);}
-  .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;background:var(--bg-panel-2);color:var(--muted-2);}
+  .submit-btn:disabled:hover{background:var(--bg-panel-2);transform:none;box-shadow:none;}
   .form-msg{margin-top:14px;padding:12px 14px;border-radius:8px;font-size:13.5px;display:none;}
   .form-msg.ok{display:block;background:var(--success-bg);color:var(--success);border:1px solid rgba(76,154,90,.3);}
   .form-msg.err{display:block;background:var(--danger-bg);color:#e2857c;border:1px solid rgba(193,68,58,.3);}
@@ -166,7 +167,7 @@
   @media (max-width:640px){.toggle-group{grid-template-columns:1fr;}}
   .toggle-item{background:var(--bg-panel-2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .toggle-item .label{font-size:13px;font-weight:600;}
-  .toggle-item .label .sub{font-weight:400;color:var(--muted);font-size:11px;}
+  .toggle-item .label .sub{font-weight:400;color:var(--muted);font-size:11px;display:block;}
   .switch{width:44px;height:24px;background:var(--bg-panel-2);border:1px solid var(--border);border-radius:100px;position:relative;cursor:pointer;flex-shrink:0;}
   .switch.on{background:var(--success-bg);border-color:var(--success);}
   .switch .knob{width:18px;height:18px;border-radius:50%;background:var(--muted);position:absolute;top:2px;left:2px;transition:.2s;}
@@ -212,8 +213,8 @@
       <div class="brand">
         <div class="brand-mark" id="brandMark">M</div>
         <div>
-          <div class="brand-name" id="brandName">MEDIA ACCESS</div>
-          <div class="brand-sub">Проверенный мод</div>
+          <div class="brand-name" id="brandName">StealthBypass</div>
+          <div class="brand-sub">Медиа-набор</div>
         </div>
       </div>
       <div class="nav-links">
@@ -380,8 +381,8 @@
 
   <footer>
     <div class="wrap footer-inner">
-      <div>© <span id="year"></span> Медиа-набор. Все заявки рассматриваются вручную.</div>
-      <div>По вопросам сайта — Discord <a href="https://discord.com/users/" target="_blank" rel="noopener" id="siteAdminLink">chmo77887</a> · <a href="#" id="openAdminLink2">Админ-панель</a></div>
+      <div>© <span id="year"></span> StealthBypass — медиа-набор. Все заявки рассматриваются вручную.</div>
+      <div><a href="#" id="openAdminLink2">Админ-панель</a></div>
     </div>
   </footer>
 </div>
@@ -392,8 +393,8 @@
     <a href="#" class="back-link" id="backFromLogin">← На главную</a>
     <div class="login-box">
       <h2>Вход для администратора</h2>
-      <p>Доступ только для почт из списка администраторов или зам. кураторов.</p>
-      <div class="field"><label>Почта</label><input type="email" id="adminEmail" placeholder="you@example.com"></div>
+      <p>Введите почту для входа в админ-панель.</p>
+      <div class="field"><label>Почта</label><input type="email" id="adminEmail" placeholder="admin@example.com"></div>
       <button class="submit-btn" id="adminLoginBtn">Войти</button>
       <div class="form-msg" id="adminLoginMsg"></div>
     </div>
@@ -464,7 +465,6 @@ const CONFIG = {
   modName: "StealthBypass",
   discordChannelUrl: "https://discord.gg/REPLACE_ME",
   telegramUrl: "https://t.me/REPLACE_ME",
-  siteAdminDiscordTag: "chmo77887",
   defaultCallLink: "https://discord.gg/mJEPkeKVQ",
   admins: ["admin@example.com"],
   curators: ["krust@example.com"],
@@ -472,7 +472,7 @@ const CONFIG = {
 /* ========================================================= */
 
 document.getElementById('brandName').textContent = CONFIG.modName;
-document.getElementById('brandMark').textContent = CONFIG.modName.trim()[0]?.toUpperCase() || 'M';
+document.getElementById('brandMark').textContent = CONFIG.modName.trim()[0]?.toUpperCase() || 'S';
 document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('discordChannelLink').href = CONFIG.discordChannelUrl;
 document.getElementById('telegramChannelLink').href = CONFIG.telegramUrl;
@@ -483,12 +483,11 @@ function lsSet(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
 
 /* ---------- admin-config ---------- */
 const DEFAULT_CONFIG = { 
-  recruitmentOpen: true, 
-  announcement: '', 
-  callLink: CONFIG.defaultCallLink,
   mediaOpen: true,
   curatorOpen: true,
-  checkerOpen: true
+  checkerOpen: true,
+  announcement: '', 
+  callLink: CONFIG.defaultCallLink
 };
 function getAdminConfig(){ const raw = lsGet('admin-config'); return raw ? { ...DEFAULT_CONFIG, ...raw } : { ...DEFAULT_CONFIG }; }
 function setAdminConfig(cfg){ lsSet('admin-config', cfg); }
@@ -500,7 +499,6 @@ function renderStatus(){
   const title = document.getElementById('statusTitle');
   const announce = document.getElementById('statusAnnounce');
   
-  // Главный статус (для обратной совместимости)
   const anyOpen = cfg.mediaOpen || cfg.curatorOpen || cfg.checkerOpen;
   if(anyOpen){ light.className = 'status-light open'; title.textContent = 'Набор открыт'; }
   else { light.className = 'status-light closed'; title.textContent = 'Набор закрыт'; }
@@ -571,51 +569,49 @@ function updateSubmitButtons(){
   const checkerBtn = document.getElementById('checkerSubmitBtn');
   
   mediaBtn.disabled = !isFormOpen('media');
-  mediaBtn.textContent = isFormOpen('media') ? 'Отправить заявку' : '❌ Набор закрыт';
+  mediaBtn.textContent = isFormOpen('media') ? 'Отправить заявку' : '❌ Набор закрыт — ждите отбора';
   
   curatorBtn.disabled = !isFormOpen('curator');
-  curatorBtn.textContent = isFormOpen('curator') ? 'Отправить заявку' : '❌ Набор закрыт';
+  curatorBtn.textContent = isFormOpen('curator') ? 'Отправить заявку' : '❌ Набор закрыт — ждите отбора';
   
   checkerBtn.disabled = !isFormOpen('checker');
-  checkerBtn.textContent = isFormOpen('checker') ? 'Отправить заявку' : '❌ Набор закрыт';
+  checkerBtn.textContent = isFormOpen('checker') ? 'Отправить заявку' : '❌ Набор закрыт — ждите отбора';
 }
 
-// Отправка медиа-заявки
+// Отправка медиа-заявки (все на admin@example.com)
 document.getElementById('mediaApplyForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const msg = document.getElementById('mediaFormMsg');
   if(!isFormOpen('media')){
-    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на медиа сейчас закрыт.';
+    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на медиа сейчас закрыт. Ждите отбора.';
     return;
   }
-  const email = document.getElementById('adminEmail').value.trim() || 'anonymous';
   const id = genId();
   const app = {
     id, type: 'media',
     name: mName.value.trim(), age: mAge.value,
     youtube: mYoutube.value.trim(), views: mViews.value.trim(),
     clips: `${mClipsCount.value} ${mClipsPeriod.value}`,
-    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: email
+    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: 'admin@example.com'
   };
   const apps = getApps();
   apps[id] = app;
   setApps(apps);
   msg.className = 'form-msg ok';
-  msg.textContent = '✅ Заявка отправлена!';
+  msg.textContent = '✅ Заявка отправлена! Статус можно проверить в разделе «Мои заявки».';
   document.getElementById('mediaApplyForm').reset();
   updateCard();
-  renderMyStatus(email);
+  renderMyStatus();
 });
 
-// Отправка заявки на зам. куратора
+// Отправка заявки на зам. куратора (все на admin@example.com)
 document.getElementById('curatorApplyForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const msg = document.getElementById('curatorFormMsg');
   if(!isFormOpen('curator')){
-    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на зам. куратора сейчас закрыт.';
+    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на зам. куратора сейчас закрыт. Ждите отбора.';
     return;
   }
-  const email = document.getElementById('adminEmail').value.trim() || 'anonymous';
   const id = genId();
   const app = {
     id, type: 'curator',
@@ -623,7 +619,7 @@ document.getElementById('curatorApplyForm').addEventListener('submit', (e) => {
     age: document.getElementById('cAge').value,
     experience: document.getElementById('cExperience').value.trim(),
     help: document.getElementById('cHelp').value.trim(),
-    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: email
+    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: 'admin@example.com'
   };
   const apps = getApps();
   apps[id] = app;
@@ -631,18 +627,17 @@ document.getElementById('curatorApplyForm').addEventListener('submit', (e) => {
   msg.className = 'form-msg ok';
   msg.textContent = '✅ Заявка на зам. куратора отправлена!';
   document.getElementById('curatorApplyForm').reset();
-  renderMyStatus(email);
+  renderMyStatus();
 });
 
-// Отправка заявки на проверяющего
+// Отправка заявки на проверяющего (все на admin@example.com)
 document.getElementById('checkerApplyForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const msg = document.getElementById('checkerFormMsg');
   if(!isFormOpen('checker')){
-    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на проверяющего сейчас закрыт.';
+    msg.className = 'form-msg err'; msg.textContent = '❌ Набор на проверяющего сейчас закрыт. Ждите отбора.';
     return;
   }
-  const email = document.getElementById('adminEmail').value.trim() || 'anonymous';
   const id = genId();
   const app = {
     id, type: 'checker',
@@ -651,7 +646,7 @@ document.getElementById('checkerApplyForm').addEventListener('submit', (e) => {
     time: document.getElementById('chTime').value.trim(),
     os: document.getElementById('chOS').value,
     changeOS: document.getElementById('chChangeOS').value,
-    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: email
+    status: 'pending', reason: '', submittedAt: Date.now(), submittedBy: 'admin@example.com'
   };
   
   const ageOk = parseInt(app.age) >= 14;
@@ -674,14 +669,14 @@ document.getElementById('checkerApplyForm').addEventListener('submit', (e) => {
   msg.className = 'form-msg ok';
   msg.textContent = '✅ Заявка на проверяющего отправлена!';
   document.getElementById('checkerApplyForm').reset();
-  renderMyStatus(email);
+  renderMyStatus();
 });
 
 /* ---------- my status ---------- */
-function renderMyStatus(email){
+function renderMyStatus(){
   const wrap = document.getElementById('myStatusList');
   const apps = getApps();
-  const my = Object.values(apps).filter(a => a.submittedBy === (email || 'anonymous'));
+  const my = Object.values(apps).filter(a => a.submittedBy === 'admin@example.com');
   if(!my.length){ wrap.innerHTML = '<div class="empty-note">Заявок пока нет</div>'; return; }
   wrap.innerHTML = my.slice().reverse().map(a => {
     const badgeClass = a.status === 'approved' ? 'approved' : a.status === 'rejected' ? 'rejected' : 'pending';
@@ -745,7 +740,6 @@ document.getElementById('adminLogoutBtn').addEventListener('click', () => {
 /* ---------- admin settings ---------- */
 let switchStates = { media: true, curator: true, checker: true };
 
-// Загружаем состояния переключателей
 function loadSwitchStates(){
   const cfg = getAdminConfig();
   switchStates.media = cfg.mediaOpen !== false;
@@ -757,24 +751,26 @@ function loadSwitchStates(){
   document.getElementById('switchChecker').classList.toggle('on', switchStates.checker);
 }
 
-// Переключатели
 document.getElementById('switchMedia').addEventListener('click', () => {
   if(currentUserRole === 'curator') return;
   switchStates.media = !switchStates.media;
   document.getElementById('switchMedia').classList.toggle('on', switchStates.media);
   updateSubmitButtons();
+  renderStatus();
 });
 document.getElementById('switchCurator').addEventListener('click', () => {
   if(currentUserRole === 'curator') return;
   switchStates.curator = !switchStates.curator;
   document.getElementById('switchCurator').classList.toggle('on', switchStates.curator);
   updateSubmitButtons();
+  renderStatus();
 });
 document.getElementById('switchChecker').addEventListener('click', () => {
   if(currentUserRole === 'curator') return;
   switchStates.checker = !switchStates.checker;
   document.getElementById('switchChecker').classList.toggle('on', switchStates.checker);
   updateSubmitButtons();
+  renderStatus();
 });
 
 document.getElementById('saveSettingsBtn').addEventListener('click', () => {
@@ -835,7 +831,7 @@ function renderApps(){
     const date = new Date(a.submittedAt).toLocaleString('ru-RU');
     const badgeClass = a.status === 'approved' ? 'approved' : a.status === 'rejected' ? 'rejected' : 'pending';
     const badgeText = a.status === 'approved' ? 'Одобрено ✅' : a.status === 'rejected' ? 'Отклонено ❌' : 'На рассмотрении ⏳';
-    const showApprove = a.status !== 'approved' && currentUserRole !== null && (currentUserRole === 'admin' || a.type === 'media');
+    const showApprove = a.status !== 'approved' && currentUserRole === 'admin';
     const showReject = a.status !== 'rejected' && currentUserRole === 'admin';
     
     let typeClass = 'app-type-badge';
@@ -908,7 +904,7 @@ document.getElementById('appsList').addEventListener('click', (e) => {
     app.callLink = cfg.callLink || CONFIG.defaultCallLink;
     setApps(apps);
     renderApps();
-    renderMyStatus(app.submittedBy);
+    renderMyStatus();
   }
   if(action === 'reject-toggle'){
     if(currentUserRole !== 'admin') return;
@@ -923,11 +919,10 @@ document.getElementById('appsList').addEventListener('click', (e) => {
     app.callLink = '';
     setApps(apps);
     renderApps();
-    renderMyStatus(app.submittedBy);
+    renderMyStatus();
   }
 });
 
-// Переключение между типами заявок в админке
 document.querySelectorAll('.sub-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
@@ -948,7 +943,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 /* ---------- init ---------- */
 renderStatus();
-renderMyStatus('anonymous');
+renderMyStatus();
 updateSubmitButtons();
 </script>
 </body>
