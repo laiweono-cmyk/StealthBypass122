@@ -485,25 +485,26 @@ document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('discordChannelLink').href = CONFIG.discordChannelUrl;
 document.getElementById('telegramChannelLink').href = CONFIG.telegramUrl;
 
-/* ---------- JSONBin ----------
-   Бин теперь хранит ОБЩИЙ объект { config: {...}, applications: {...} },
-   поэтому заявки синхронизируются в облако точно так же, как раньше
-   синхронизировался только статус набора. */
-async function fetchCloudRecord(){
+/* ---------- JSONBin ---------- */
+async function loadConfigFromCloud(){
   try{
     const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}/latest`, {
       headers: { 'X-Master-Key': CONFIG.JSONBIN_API_KEY }
     });
-    if(!res.ok) return null;
+    if(!res.ok) return false;
     const data = await res.json();
-    return data.record || null;
+    if(data.record){
+      localStorage.setItem('admin-config', JSON.stringify(data.record));
+      return true;
+    }
+    return false;
   }catch(e){
-    console.warn('Cloud fetch error:', e);
-    return null;
+    console.warn('Cloud load error:', e);
+    return false;
   }
 }
 
-async function pushCloudRecord(record){
+async function saveConfigToCloud(cfg){
   try{
     const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.JSONBIN_BIN_ID}`, {
       method: 'PUT',
@@ -511,36 +512,13 @@ async function pushCloudRecord(record){
         'Content-Type': 'application/json',
         'X-Master-Key': CONFIG.JSONBIN_API_KEY
       },
-      body: JSON.stringify(record)
+      body: JSON.stringify(cfg)
     });
     return res.ok;
   }catch(e){
-    console.warn('Cloud push error:', e);
+    console.warn('Cloud save error:', e);
     return false;
   }
-}
-
-async function loadConfigFromCloud(){
-  const record = await fetchCloudRecord();
-  if(!record) return false;
-  if(record.config) localStorage.setItem('admin-config', JSON.stringify(record.config));
-  if(record.applications) localStorage.setItem('applications', JSON.stringify(record.applications));
-  return true;
-}
-
-// Сохраняет настройки набора, не трогая чужие заявки, уже лежащие в облаке
-async function saveConfigToCloud(cfg){
-  const record = (await fetchCloudRecord()) || {};
-  record.config = cfg;
-  return pushCloudRecord(record);
-}
-
-// Сохраняет заявки, подмешивая их к тому, что уже лежит в облаке
-// (а не затирая полностью — так заявки от разных людей не перетирают друг друга)
-async function saveAppsToCloud(apps){
-  const record = (await fetchCloudRecord()) || {};
-  record.applications = { ...(record.applications || {}), ...apps };
-  return pushCloudRecord(record);
 }
 
 /* ---------- storage ---------- */
@@ -604,7 +582,7 @@ function genId(){ return 'app_' + Date.now().toString(36) + '_' + Math.random().
 
 /* ---------- submit ---------- */
 function getApps(){ return lsGet('applications') || {}; }
-function setApps(apps){ lsSet('applications', apps); saveAppsToCloud(apps); }
+function setApps(apps){ lsSet('applications', apps); }
 
 let currentUserEmail = null;
 let currentUserRole = null;
@@ -828,8 +806,7 @@ document.getElementById('adminLoginBtn').addEventListener('click', () => {
     document.getElementById('roleBadge').className = 'role-badge ' + role;
     document.getElementById('adminEmailShown').className = 'admin-user' + (role === 'curator' ? ' curator' : '');
     showView('dash');
-    document.getElementById('appsList').innerHTML = '<div class="empty-note">Загрузка заявок...</div>';
-    loadConfigFromCloud().then(loadAdminDashboard);
+    loadAdminDashboard();
   }else{
     msg.className = 'form-msg err'; msg.textContent = 'Эта почта не имеет доступа.';
   }
@@ -1056,48 +1033,29 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 /* ---------- init ---------- */
 let lastStatus = '';
-let lastAppsStatus = '';
-
-function showToast(text){
-  const toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#c9a227;color:#14120a;padding:12px 20px;border-radius:8px;font-weight:700;z-index:9999;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.5);';
-  toast.textContent = text;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
 
 async function init(){
   await loadConfigFromCloud();
   lastStatus = JSON.stringify(getAdminConfig());
-  lastAppsStatus = JSON.stringify(getApps());
   renderStatus();
   renderMyStatus();
   updateSubmitButtons();
   
-  // АВТООБНОВЛЕНИЕ КАЖДЫЕ 3 СЕКУНДЫ (статус набора + новые заявки)
+  // АВТООБНОВЛЕНИЕ КАЖДЫЕ 5 СЕКУНД
   setInterval(async () => {
     await loadConfigFromCloud();
-
     const newStatus = JSON.stringify(getAdminConfig());
     if (newStatus !== lastStatus) {
       lastStatus = newStatus;
       renderStatus();
       updateSubmitButtons();
-      showToast('🔄 Статус набора обновлён!');
-    }
-
-    const newAppsStatus = JSON.stringify(getApps());
-    if (newAppsStatus !== lastAppsStatus) {
-      lastAppsStatus = newAppsStatus;
-      renderMyStatus();
-
-      const dashVisible = !document.getElementById('adminDashView').classList.contains('hidden');
-      if (currentUserRole && dashVisible) {
-        allApps = Object.values(getApps());
-        allApps.sort((a,b) => b.submittedAt - a.submittedAt);
-        renderApps();
-        showToast('📩 Новая заявка!');
-      }
+      
+      // Показываем уведомление
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#c9a227;color:#14120a;padding:12px 20px;border-radius:8px;font-weight:700;z-index:9999;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.5);';
+      toast.textContent = '🔄 Статус набора обновлён!';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
   }, 3000);
 }
