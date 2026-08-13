@@ -474,7 +474,6 @@ const CONFIG = {
   defaultCallLink: "https://discord.gg/mJEPkeKVQ",
   admins: ["admin@example.com"],
   curators: ["krust@example.com"],
-  // JSONBin
   JSONBIN_BIN_ID: "6a7db383f5f4af5e2910e91e",
   JSONBIN_API_KEY: "$2a$10$J1tAnCantpwHPryv7Vjc0OOKFXt8lzNJPDg3asmqmoOdXfX94soeK"
 };
@@ -1004,23 +1003,32 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 /* ---------- init ---------- */
+let lastStatus = '';
+
 async function init(){
   await loadConfigFromCloud();
+  lastStatus = JSON.stringify(getAdminConfig());
   renderStatus();
   renderMyStatus();
   updateSubmitButtons();
   
-  // Автообновление каждые 15 секунд (проверка статуса)
-  let lastStatus = JSON.stringify(getAdminConfig());
+  // АВТООБНОВЛЕНИЕ КАЖДЫЕ 5 СЕКУНД
   setInterval(async () => {
     await loadConfigFromCloud();
     const newStatus = JSON.stringify(getAdminConfig());
-    if(newStatus !== lastStatus){
+    if (newStatus !== lastStatus) {
       lastStatus = newStatus;
       renderStatus();
       updateSubmitButtons();
+      
+      // Показываем уведомление
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#c9a227;color:#14120a;padding:12px 20px;border-radius:8px;font-weight:700;z-index:9999;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.5);';
+      toast.textContent = '🔄 Статус набора обновлён!';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
-  }, 15000);
+  }, 5000);
 }
 
 init();
